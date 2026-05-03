@@ -1,0 +1,92 @@
+data:
+  root: "."
+  patch_dir: "organized_patches"
+  csv_files:
+    balanced:        "dataset_balanced_3class.csv"
+    benign_heavy:    "dataset_benign_heavy_3class.csv"
+    atypical_heavy:  "dataset_atypical_heavy_3class.csv"
+    malignant_heavy: "dataset_malignant_heavy_3class.csv"
+  image_size: 224
+  num_workers: 4
+  val_split: 0.15
+  test_split: 0.10
+
+labels:
+  classes: ["benign", "atypical", "malignant"]
+  num_classes: 3
+  label_to_idx:
+    benign:    0
+    atypical:  1
+    malignant: 2
+
+model:
+  vmoe:
+    backbone: "efficientnet_b2.ra_in1k"
+    pretrained: true
+    num_experts: 4
+    top_k: 2
+    expert_dropout: 0.1
+    load_balance_coeff: 0.01
+    attn_head_hidden: 256
+    cls_head_hidden: 256
+    freeze_blocks: 5
+
+  ensemble:
+    hidden_dims: [128, 64]
+    dropout: 0.3
+
+  student:
+    backbone: "efficientnet_b2.ra_in1k"
+    pretrained: true
+    dropout: 0.1
+    cls_head_hidden: 128
+    attn_head_hidden: 128
+    freeze_blocks: 4
+
+training:
+  vmoe:
+    epochs: 5
+    batch_size: 32
+    learning_rate: 1.0e-3
+    backbone_lr_ratio: 0.1
+    weight_decay: 1.0e-4
+    warmup_epochs: 2
+    grad_clip: 1.0
+    amp: true
+    patience: 7
+    unfreeze_epoch: 0
+
+  ensemble:
+    epochs: 5
+    batch_size: 64
+    learning_rate: 1.0e-3
+    weight_decay: 1.0e-4
+
+  distillation:
+    epochs: 50
+    batch_size: 32
+    learning_rate: 5.0e-4
+    backbone_lr_ratio: 0.1
+    weight_decay: 1.0e-4
+    warmup_epochs: 5
+    grad_clip: 1.0
+    amp: true
+    patience: 12
+    temperature: 3.0
+    alpha: 0.6
+    unfreeze_epoch: 15
+
+loss:
+  focal_gamma: 2.0
+  reg_weight: 0.1
+
+checkpoints:
+  dir: "checkpoints_3class"
+  save_top_k: 3
+
+logging:
+  dir: "logs_3class"
+  log_every_n_steps: 20
+
+seed: 42
+device: "auto"

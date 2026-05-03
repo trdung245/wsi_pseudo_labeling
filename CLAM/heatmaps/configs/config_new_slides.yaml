@@ -1,0 +1,55 @@
+# python create_heatmaps.py --config_file heatmaps/configs/config_new_slides.yaml
+---
+exp_arguments:
+  n_classes: 3
+  save_exp_code: HEATMAP_OUTPUT
+  raw_save_dir: heatmaps/heatmap_raw_results
+  production_save_dir: heatmaps/heatmap_production_results
+  batch_size: 128
+data_arguments:
+  data_dir: slide_data
+  data_dir_key: source
+  process_list: heatmap_new_slides.csv
+  preset: presets/bwh_biopsy.csv
+  slide_ext: .svs
+  label_dict:
+    benign: 0
+    atypical: 1
+    malignant: 2
+patching_arguments:
+  patch_size: 256
+  overlap: 0.5
+  patch_level: 0
+  custom_downsample: 1
+encoder_arguments:
+  model_name: resnet50_trunc
+  target_img_size: 224
+model_arguments:
+  ckpt_path: results/bracs_subtype_clam_s1/s_1_checkpoint.pt
+  model_type: clam_sb
+  initiate_fn: initiate_model
+  model_size: small
+  drop_out: 0.
+  embed_dim: 1024
+heatmap_arguments:
+  vis_level: 1
+  alpha: 0.4
+  blank_canvas: false
+  save_orig: true
+  save_ext: jpg
+  use_ref_scores: false
+  blur: false
+  use_center_shift: true
+  use_roi: false
+  calc_heatmap: true
+  binarize: false
+  binary_thresh: -1
+  custom_downsample: 1
+  cmap: jet
+sample_arguments:
+  samples:
+    - name: "topk_high_attention"
+      sample: true
+      seed: 1
+      k: 15
+      mode: topk

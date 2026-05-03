@@ -1,0 +1,100 @@
+data:
+  root: "."
+  patch_dir: "organized_patches"
+  csv_files:
+    balanced:        "dataset_balanced_clean.csv"
+    neg_heavy:       "dataset_neg_heavy_clean.csv"
+    benign_heavy:    "dataset_benign_heavy_clean.csv"
+    atypical_heavy:  "dataset_atypical_heavy_clean.csv"
+    malignant_heavy: "dataset_malignant_heavy_clean.csv"
+  image_size: 224
+  num_workers: 4
+  val_split: 0.15       # fraction of each dataset used for validation
+  test_split: 0.10      # fraction held out as test set
+
+labels:
+  classes: ["non-cancer", "benign", "atypical", "malignant"]
+  num_classes: 4
+
+model:
+  # Vision Mixture of Experts — one per dataset in Phase 1
+  vmoe:
+    backbone: "efficientnet_b2.ra_in1k"
+    pretrained: true
+    num_experts: 4
+    top_k: 2
+    expert_dropout: 0.1
+    load_balance_coeff: 0.01
+    attn_head_hidden: 256
+    cls_head_hidden: 256
+    freeze_blocks: 5
+
+  # Stacking meta-learner (Phase 2)
+  ensemble:
+    hidden_dims: [128, 64]
+    dropout: 0.3
+
+  # Student model for knowledge distillation (Phase 3)
+  student:
+    backbone: "efficientnet_b2.ra_in1k"
+    pretrained: true
+    dropout: 0.1
+    cls_head_hidden: 128
+    attn_head_hidden: 128
+    freeze_blocks: 4
+
+training:
+  # Phase 1: train each VMoE independently
+  vmoe:
+    epochs: 30
+    batch_size: 32
+    # Head LR: new layers train at full speed
+    learning_rate: 1.0e-3
+    # Backbone LR = learning_rate * backbone_lr_ratio = 1e-4
+    backbone_lr_ratio: 0.1
+    weight_decay: 1.0e-4
+    warmup_epochs: 2              # shorter warmup; heads converge faster
+    grad_clip: 1.0
+    amp: true
+    patience: 7
+    # Unfreeze full backbone at this epoch for end-to-end fine-tuning.
+    # 0 = never unfreeze (keep frozen for entire training).
+    unfreeze_epoch: 0              # 0 = never unfreeze; backbone blocks 5-6 already train
+
+  # Phase 2: train stacking meta-learner (frozen VMoE backbones)
+  ensemble:
+    epochs: 20
+    batch_size: 64
+    learning_rate: 1.0e-3
+    weight_decay: 1.0e-4
+
+  # Phase 3: knowledge distillation
+  distillation:
+    epochs: 50
+    batch_size: 32
+    learning_rate: 5.0e-4
+    backbone_lr_ratio: 0.1        # student backbone LR = 1.0e-3
+    weight_decay: 1.0e-4
+    warmup_epochs: 5
+    grad_clip: 1.0
+    amp: true
+    patience: 12
+    temperature: 3.0
+    alpha: 0.6
+    unfreeze_epoch: 15
+
+loss:
+  # CBFocalMultiTaskLoss (Class-Balanced Focal + fixed-weight Huber regression)
+  focal_gamma: 2.0               # focusing parameter γ; 2.0 is the standard recommendation
+  reg_weight: 0.1                # fixed scalar weight for the attention-regression task
+
+checkpoints:
+  dir: "checkpoints"
+  save_top_k: 3
+
+logging:
+  dir: "logs"
+  log_every_n_steps: 20
+
+seed: 42
+device: "auto"   # "auto" selects cuda > mps > cpu

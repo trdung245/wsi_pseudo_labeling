@@ -1,0 +1,27 @@
+**/.DS_Store
+__pycache__/
+notebooks/
+
+# WSI slides (large binary files)
+slide_data/
+
+# Extracted features (h5)
+FEATURES_DIRECTORY/
+h5_files/
+heatmaps/heatmap_raw_results/
+heatmaps/heatmap_production_results/
+
+# Extracted patch images
+patch_dataset/
+
+# Trained model checkpoints
+results/
+
+# Train/val/test splits (generated)
+splits/
+
+# Generated CSVs
+attention_scores*.csv
+attention_scores_benign_kept.csv
+pseudo_pos*.csv
+*.h5
