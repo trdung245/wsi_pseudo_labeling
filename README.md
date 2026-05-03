@@ -2,7 +2,7 @@
 
 A four-class histopathology classification pipeline for the **BRACS** dataset
 (non-cancer · benign · atypical · malignant) built on top of
-[CLAM](https://github.com/mahmoodlab/CLAM).
+[CLAM](https://github.com/mahmoodlab/CLAM) (Lu et al., *Nature Biomedical Engineering*, 2021).
 
 The pipeline combines **attention-guided pseudo-labeling** with a three-phase
 training strategy: per-dataset Vision Mixture-of-Experts → stacking ensemble
@@ -474,3 +474,48 @@ training:
 
 A 3-class variant (benign · atypical · malignant, dropping non-cancer) is
 available via `--config configs/config_3class.yaml`.
+
+---
+
+## References
+
+**BRACS** — the dataset used in this work:
+
+> Brancati, N., Anniciello, A.M., Pati, P. et al. *BRACS: A Dataset for BReAst Carcinoma
+> Subtyping in H&E Histology Images.*
+> **Database (Oxford)** 2022, baac093 (2022).
+> https://doi.org/10.1093/database/baac093
+
+```bibtex
+@article{brancati2022bracs,
+  title={{BRACS}: A Dataset for {BReAst} Carcinoma Subtyping in {H\&E} Histology Images},
+  author={Brancati, Nadia and Anniciello, Anna Maria and Pati, Pushpak and Riccio, Daniel and Scognamiglio, Giose{\`{u}}e and Jaume, Guillaume and De Pietro, Giuseppe and Di Bonito, Maurizio and Foncubierta, Antonio and Botti, Gerardo and Gabrani, Maria and Feroce, Florinda and Frucci, Maria},
+  journal={Database},
+  volume={2022},
+  pages={baac093},
+  year={2022},
+  publisher={Oxford Academic},
+  doi={10.1093/database/baac093}
+}
+```
+
+---
+
+**CLAM** — the weakly-supervised MIL framework this pipeline is built on:
+
+> Lu, M.Y., Williamson, D.F.K., Chen, T.Y. et al. *Data-efficient and weakly supervised
+> computational pathology on whole-slide images.*
+> **Nature Biomedical Engineering** 5, 555–570 (2021).
+> https://doi.org/10.1038/s41551-020-00682-w
+
+```bibtex
+@article{lu2021data,
+  title={Data-efficient and weakly supervised computational pathology on whole-slide images},
+  author={Lu, Ming Y and Williamson, Drew FK and Chen, Tiffany Y and Chen, Richard J and Barbieri, Matteo and Mahmood, Faisal},
+  journal={Nature Biomedical Engineering},
+  volume={5},
+  pages={555--570},
+  year={2021},
+  publisher={Nature Publishing Group}
+}
+```
